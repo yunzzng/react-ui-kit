@@ -21,7 +21,7 @@ const CarouselIndicator: FC<CarouselIndicatorProps> = ({ className, activeColor,
       {indexes.map((index) => (
         <button
           key={index}
-          className={index === carouselIndex ? "active" : ""}
+          className={`${index === carouselIndex ? "active" : ""} ${className || ""}`.trim()}
           style={{ backgroundColor: index === carouselIndex ? activeColor : defaultColor }}
           onClick={() => setCarouselIndex(index)}
         />
