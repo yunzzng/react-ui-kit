@@ -1,71 +1,31 @@
-import {
-  cloneElement,
-  FC,
-  isValidElement,
-  ReactElement,
-  ReactNode,
-  useContext,
-  useMemo,
-} from "react";
-import { CarouselContext } from ".";
-import { carouselIndicatorBaseCls } from "@consts/className";
+import { FC, useMemo } from "react";
+import useCarouselContext from "./hooks/useCarouselContext";
 
 interface CarouselIndicatorProps {
   className?: string;
-  children?: (indexes: number[], to: (index: number) => void) => ReactNode;
+  activeColor?: string;
+  defaultColor?: string;
 }
 
-const CarouselIndicator: FC<CarouselIndicatorProps> = ({
-  className,
-  children,
-}) => {
-  const carouselContext = useContext(CarouselContext) ?? {
-    carouselIndex: 0,
-    setCarouselIndex: () => {},
-    itemLength: 0,
-  };
+const CarouselIndicator: FC<CarouselIndicatorProps> = ({ className, activeColor, defaultColor }) => {
+  const { carouselIndex, setCarouselIndex, itemLength } = useCarouselContext();
 
-  const { carouselIndex, setCarouselIndex, itemLength } = carouselContext;
+  const indexes = useMemo(() => Array.from({ length: itemLength }, (_, index) => index), [itemLength]);
 
   const carouselIndicatorCls = useMemo(() => {
-    return className
-      ? `${className} ${carouselIndicatorBaseCls}`
-      : carouselIndicatorBaseCls;
+    return className ? className : "";
   }, [className]);
-
-  const indexes = Array.from({ length: itemLength }, (_, index) => index);
-  const to = (index: number) => setCarouselIndex(index);
-
-  if (isValidElement(children)) {
-    return (
-      <div className={carouselIndicatorCls}>
-        {indexes.map((index) =>
-          cloneElement(children as ReactElement, {
-            key: index,
-            "data-active": carouselIndex === index,
-            onClick: () => to(index),
-          })
-        )}
-      </div>
-    );
-  }
 
   return (
     <div className={carouselIndicatorCls}>
-      {children && typeof children === "function"
-        ? children(indexes, to)
-        : indexes.map((index) => {
-            const isActive = carouselIndex === index;
-            return (
-              <button
-                key={index}
-                data-active={isActive}
-                onClick={() => to(index)}
-              >
-                {index + 1}
-              </button>
-            );
-          })}
+      {indexes.map((index) => (
+        <button
+          key={index}
+          className={index === carouselIndex ? "active" : ""}
+          style={{ backgroundColor: index === carouselIndex ? activeColor : defaultColor }}
+          onClick={() => setCarouselIndex(index)}
+        />
+      ))}
     </div>
   );
 };
